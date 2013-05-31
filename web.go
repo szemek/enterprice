@@ -5,6 +5,7 @@ import (
   "net/http"
   "os"
   "regexp"
+  "io/ioutil"
 )
 
 func main() {
@@ -23,10 +24,19 @@ func main() {
 }
 
 func router(res http.ResponseWriter, req *http.Request) {
-  if match("/hello", req.URL.Path) {
-    fmt.Fprintln(res, "hello, world")
+  if match("^/$", req.URL.Path) {
+    body, _ := ioutil.ReadFile("./public/index.html")
+    fmt.Fprintln(res, string(body))
+  } else if match("^/js/*", req.URL.Path) {
+    body, _ := ioutil.ReadFile("./public/" + req.URL.Path)
+    res.Header().Set("Content-Type", "application/x-javascript; charset=utf-8")
+    fmt.Fprintln(res, string(body))
+  } else if match("^/css/*", req.URL.Path) {
+    body, _ := ioutil.ReadFile("./public/" + req.URL.Path)
+    res.Header().Set("Content-Type", "text/css")
+    fmt.Fprintln(res, string(body))
   } else {
-    fmt.Fprintln(res, ".")
+    fmt.Fprintln(res, "")
   }
 }
 
