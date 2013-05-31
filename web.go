@@ -27,14 +27,8 @@ func router(res http.ResponseWriter, req *http.Request) {
   if match("^/$", req.URL.Path) {
     body, _ := ioutil.ReadFile("./public/index.html")
     fmt.Fprintln(res, string(body))
-  } else if match("^/js/*", req.URL.Path) {
-    body, _ := ioutil.ReadFile("./public/" + req.URL.Path)
-    res.Header().Set("Content-Type", "application/x-javascript; charset=utf-8")
-    fmt.Fprintln(res, string(body))
-  } else if match("^/css/*", req.URL.Path) {
-    body, _ := ioutil.ReadFile("./public/" + req.URL.Path)
-    res.Header().Set("Content-Type", "text/css")
-    fmt.Fprintln(res, string(body))
+  } else if match("^/[js|css]/*", req.URL.Path) {
+    http.ServeFile(res, req, "./public/" + req.URL.Path)
   } else {
     fmt.Fprintln(res, "")
   }
