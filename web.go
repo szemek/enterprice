@@ -6,6 +6,7 @@ import (
   "os"
   "regexp"
   "io/ioutil"
+  "time"
 )
 
 func main() {
@@ -23,14 +24,41 @@ func main() {
   }
 }
 
+type Route struct {
+  Method, Path string
+}
+
+func api(res http.ResponseWriter, req *http.Request) {
+  method := req.Method
+  path := req.URL.Path
+  route := Route{method, path}
+
+  switch route {
+  case Route{"GET", "/products"}:
+    fmt.Fprintln(res, "products")
+  }
+
+  fmt.Fprintln(res, req.Method)
+}
+
+func log(req *http.Request) {
+  now := time.Now().Format(time.RFC3339)
+  method := req.Method
+  path := req.URL.Path
+  address := req.RemoteAddr
+  fmt.Printf("%s %s \"%s\" from %s\n", now, method, path, address)
+}
+
 func router(res http.ResponseWriter, req *http.Request) {
+  log(req)
+
   if match("^/$", req.URL.Path) {
     body, _ := ioutil.ReadFile("./public/index.html")
     fmt.Fprintln(res, string(body))
   } else if match("^/[js|css]/*", req.URL.Path) {
     http.ServeFile(res, req, "./public/" + req.URL.Path)
   } else {
-    fmt.Fprintln(res, "")
+    api(res, req)
   }
 }
 
